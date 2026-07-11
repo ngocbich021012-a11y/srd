@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tình Yêu - LDR Quest</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #000000;
+            --gray-light: #f5f5f5;
+            --gray-dark: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            background: var(--bg-color);
+        }
+
+        h1, h2, h3 {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            background: none;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .score-box {
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .score-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--gray-dark);
+        }
+
+        .score-value {
+            font-size: 48px;
+            font-weight: 900;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-item {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: var(--gray-dark);
+            margin-top: 2px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .btn:disabled {
+            border-color: #cccccc;
+            color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: none;
+            color: #cccccc;
+        }
+
+        .btn-danger {
+            color: #ff3333;
+            border-color: #ff3333;
+        }
+
+        .btn-danger:hover {
+            background: #ff3333;
+            color: #fff;
+        }
+
+        .log-box {
+            margin-top: 20px;
+            font-size: 12px;
+            border: 1px dashed var(--border-color);
+            padding: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+            background: var(--gray-light);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Nút chuyển đổi giao diện -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('ny')">📱 Màn hình Người Yêu</button>
+        <button class="tab" onclick="checkAdminAuth()">🔑 Màn hình của Bạn</button>
+    </div>
+
+    <!-- Hộp hiển thị điểm dùng chung -->
+    <div class="score-box">
+        <div class="score-label">Số điểm hiện tại của anh ấy</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+    </div>
+
+    <!-- ================= MÀN HÌNH NGƯỜI YÊU ================= -->
+    <div id="section-ny" class="section active">
+        <h2>🛍️ Cửa Hàng Đổi Thưởng</h2>
+        <p style="font-size: 12px; margin-bottom: 15px; color: var(--gray-dark);">Tích đủ điểm để kích hoạt các thẻ quyền lực.</p>
+        
+        <div class="item-list" id="rewardsList">
+            <!-- Thẻ ngọt ngào -->
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">💬 Tin Nhắn Sến Sẩm (Cấp 1)</span>
+                    <span class="card-desc">Bắt người yêu nhắn 3 câu ngọt ngào</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Tin Nhắn Sến Sẩm', 300)">300đ</button>
+            </div>
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">🎵 File Ghi Âm Độc Quyền (Cấp 2)</span>
+                    <span class="card-desc">Nhận 1 file ghi âm giọng nói dễ thương</span>
+                </div>
+                <button class="btn" onclick="redeemReward('File Ghi Âm Độc Quyền', 1000)">1000đ</button>
+            </div>
+            <!-- Thẻ làm theo ý -->
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">📸 Bắt Gửi Ảnh Ngay (Cấp 1)</span>
+                    <span class="card-desc">Yêu cầu chụp ảnh thực tế ngay lúc đó</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Bắt Gửi Ảnh Ngay', 1000)">1000đ</button>
+            </div>
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">👑 Nóc Nhà Tạm Thời (Cấp 2)</span>
+                    <span class="card-desc">Làm "vua" trong 24 tiếng (trêu đùa vui)</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Nóc Nhà Tạm Thời', 1800)">1800đ</button>
+            </div>
+            <!-- Thẻ ngưng giận dỗi -->
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">🕊️ Đình Chiến Tạm Thời (Cấp 1)</span>
+                    <span class="card-desc">Tạm dừng dỗi 2 tiếng để nói chuyện giải quyết</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Đình Chiến Tạm Thời', 800)">800đ</button>
+            </div>
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">🛡️ Xóa Lỗi Nhẹ (Cấp 2)</span>
+                    <span class="card-desc">Bỏ qua 1 lỗi nhỏ như rep chậm, quên chúc ngủ ngon</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Xóa Lỗi Nhẹ', 1200)">1200đ</button>
+            </div>
+            <div class="card-item">
+                <div class="card-info">
+                    <span class="card-title">⭐ Miễn Tử Kim Bài (Cấp Tối Cao)</span>
+                    <span class="card-desc">Người yêu chủ động xuống nước dỗ dành và bỏ qua lỗi</span>
+                </div>
+                <button class="btn" onclick="redeemReward('Miễn Tử Kim Bài', 2500)">2500đ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MÀN HÌNH CỦA BẠN (ADMIN) ================= -->
+    <div id="section-admin" class="section">
+        <h2>⚖️ Bảng Điều Khiển Của Bạn</h2>
+        
+        <h3 style="font-size: 14px; margin-top: 15px;">➕ Cộng điểm nhiệm vụ</h3>
+        <div class="item-list" style="margin-bottom: 20px;">
+            <div class="card-item"><span>☀️ Nhắn tin chào buổi sáng</span><button class="btn" onclick="addPoints(5, 'Nhắn tin sáng')">+5</button></div>
+            <div class="card-item"><span>📸 Chủ động gửi ảnh chia sẻ cuộc sống</span><button class="btn" onclick="addPoints(10, 'Gửi ảnh cuộc sống')">+10</button></div>
+            <div class="card-item"><span>🚀 Tự giác báo cáo đi đâu/với ai</span><button class="btn" onclick="addPoints(15, 'Tự giác báo cáo')">+15</button></div>
+        </div>
+
+        <h3 style="font-size: 14px; color: #ff3333;">➖ Trừ điểm vi phạm</h3>
+        <div class="item-list">
+            <div class="card-item"><span>💬 Seen không rep / Thả cảm xúc rác</span><button class="btn btn-danger" onclick="addPoints(-10, 'Seen không rep')">-10</button></div>
+            <div class="card-item"><span>👻 Biến mất quá 3 tiếng không lý do</span><button class="btn btn-danger" onclick="addPoints(-20, 'Mất tích > 3h')">-20</button></div>
+        </div>
+
+        <h3 style="font-size: 14px; margin-top: 20px;">📜 Nhật ký hoạt động</h3>
+        <div class="log-box" id="logBox">Chưa có hoạt động nào...</div>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu lưu trữ trong bộ nhớ trình duyệt để không bị mất khi F5
+    let score = parseInt(localStorage.getItem('couple_score')) || 0;
+    let logs = JSON.parse(localStorage.getItem('couple_logs')) || [];
+    
+    // Mật mã để vào màn hình của bạn (bạn đổi thành số khác nếu muốn nha)
+    const ADMIN_PASSWORD = "123"; 
+
+    function updateUI() {
+        document.getElementById('scoreDisplay').innerText = score;
+        localStorage.setItem('couple_score', score);
+        localStorage.setItem('couple_logs', JSON.stringify(logs));
+        
+        // Cập nhật trạng thái các nút đổi quà bên màn hình người yêu
+        const buttons = document.querySelectorAll('#rewardsList .btn');
+        buttons.forEach(btn => {
+            const cost = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]);
+            if (score < cost) {
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        });
+
+        // Cập nhật nhật ký
+        const logBox = document.getElementById('logBox');
+        if(logs.length > 0) {
+            logBox.innerHTML = logs.map(log => `<div>[${log.time}] ${log.text}</div>`).reverse().join('');
+        }
+    }
+
+    function switchTab(role) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        
+        if (role === 'ny') {
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.getElementById('section-ny').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('section-admin').classList.add('active');
+        }
+    }
+
+    function checkAdminAuth() {
+        let pass = prompt("Nhập mã pin của bạn để vào trang chấm điểm:");
+        if (pass === ADMIN_PASSWORD) {
+            switchTab('admin');
+        } else {
+            alert("Sai mã rồi nha! ");
+        }
+    }
+
+    function addPoints(value, action) {
+        score += value;
+        if (score < 0) score = 0; // Điểm không âm
+        
+        let time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        logs.push({time: time, text: `${value > 0 ? 'Cộng' : 'Trừ'} ${Math.abs(value)}đ do: ${action}`});
+        if (logs.length > 30) logs.shift();
+        
+        updateUI();
+    }
+
+    function redeemReward(name, cost) {
+        if (score >= cost) {
+            score -= cost;
+            let time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            logs.push({time: time, text: `Ổng đã đổi thẻ: ${name} (-${cost}đ)`});
+            alert(`🎉 Đổi thành công! Hãy gửi ảnh chụp màn hình này cho người ấy để kích hoạt thẻ: [${name}]`);
+            updateUI();
+        }
+    }
+
+    // Khởi chạy giao diện ban đầu
+    updateUI();
+</script>
+
+</body>
+</html>
